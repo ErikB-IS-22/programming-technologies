@@ -78,5 +78,5 @@ max_new_tokens = 200
 
 ### Скриншоты 
 
-![parametrs](/screenshots/parametrs.png)
-![main](/screenshots/main.png)
+![parametrs](students/AI22/Rzaev_Farid_Ismailovich/lab_0/screenshots/parametrs.png)
+![main](students/AI22/Rzaev_Farid_Ismailovich/lab_0/screenshots/main.png)
