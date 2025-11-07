@@ -131,18 +131,22 @@ WebUI запущен:
 После экспетиментов с парамметрами получены такие результаты:
 
 1. Стандартная настройка.
+
 ![qwe](assets/image_13.png)
 ![qwe](assets/image_14.png)
 
 2. Отсутствие креативности.
+
 ![qwe](assets/image_15.png)
 ![qwe](assets/image_16.png)
 
 3. Креативность в ответах.
+
 ![qwe](assets/image_17.png)
 ![qwe](assets/image_18.png)
 
 4. ...
+
 ![qwe](assets/image_19.png)
 ![qwe](assets/image_20.png)
 
