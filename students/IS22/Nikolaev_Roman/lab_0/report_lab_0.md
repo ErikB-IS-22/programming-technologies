@@ -66,24 +66,24 @@ pip install C:\Users\user\Downloads\llama_cpp_binaries-0.56.0+cpuavx2-py3-none-w
 ```bash
 python server.py
 ```
-![qwe](assets\image_1.png)
+![qwe](assets/image_1.png)
 
 WebUI запущен:
 
-![qwe](assets\image_2.png)
+![qwe](assets/image_2.png)
 
 
 Перешёл на вкладку `Model`.
 
-![qwe](assets\image_3.png)
+![qwe](assets/image_3.png)
 
 В выпадающем списке выбрал скачаную модель.
 В основный настройках параметр `gpu-layers` можно оставить нулевым, т.к. у меня GPU. Параметр `ctx-size`, который отвечает за размер контекста(того как долго модель сможет запоминать суть диалога) выбирается произвольно.
 
 После нажатия кнопки `Load`, модель загружается и с ней можно взаимодействовать:
-![qwe](assets\image_4.png)
+![qwe](assets/image_4.png)
 
-![qwe](assets\image_5.png)
+![qwe](assets/image_5.png)
 
 
 ---
@@ -93,10 +93,10 @@ WebUI запущен:
 1. Настройка системного промта.
 
 В системном промте(первом сообщении чата) мы можем задать модель/правила поведения для модели, которым она будет следовать, пока не закончиться количество токенов выделеное на сохранение контекста модели.
-![qwe](assets\image_6.png)
+![qwe](assets/image_6.png)
 
 При дальнейшем общении модель сохраняет стить и правила общения, который были заданны системным промтом.
-![qwe](assets\image_7.png)
+![qwe](assets/image_7.png)
 
 
 2. Поменяйте модель на другую. Опишите в отчёте, что поменялось.
@@ -105,14 +105,14 @@ WebUI запущен:
 
 `Qwen2.5-Omni`:
 
-![qwe](assets\image_8.png)
-![qwe](assets\image_9.png)
+![qwe](assets/image_8.png)
+![qwe](assets/image_9.png)
 
 `Qwen2.5-Instruct`:
 
-![qwe](assets\image_10.png)
-![qwe](assets\image_11.png)
-![qwe](assets\image_12.png)
+![qwe](assets/image_10.png)
+![qwe](assets/image_11.png)
+![qwe](assets/image_12.png)
 
 По ответам моделей видно, что Qwen2.5-Instruct дает сильно более развернутые ответы на вопросы, чем Qwen2.5-Omni. Что сходится с [описание модели Qwen2.5-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct) с официального сайта: данная модель расчитана на больше расчитана на работу с текстовыми данными, когда как Qwen2.5-Omni мультимодельная модель, которая умеет работать с различными форматами данных.
 
@@ -131,19 +131,19 @@ WebUI запущен:
 После экспетиментов с парамметрами получены такие результаты:
 
 1. Стандартная настройка.
-![qwe](assets\image_13.png)
-![qwe](assets\image_14.png)
+![qwe](assets/image_13.png)
+![qwe](assets/image_14.png)
 
 2. Отсутствие креативности.
-![qwe](assets\image_15.png)
-![qwe](assets\image_16.png)
+![qwe](assets/image_15.png)
+![qwe](assets/image_16.png)
 
 3. Креативность в ответах.
-![qwe](assets\image_17.png)
-![qwe](assets\image_18.png)
+![qwe](assets/image_17.png)
+![qwe](assets/image_18.png)
 
 4. ...
-![qwe](assets\image_19.png)
-![qwe](assets\image_20.png)
+![qwe](assets/image_19.png)
+![qwe](assets/image_20.png)
 
 ---
