@@ -29,8 +29,7 @@
             input=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_text}
-            ],
-            store=True
+            ]
         )
         return response.output_text
     ```
@@ -58,8 +57,7 @@
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_text}
             ],
-            temperature=float(temperature),
-            store=True
+            temperature=float(temperature)
         )
         return response.output_text
     ```
@@ -90,8 +88,7 @@
         response = client.responses.create(
             model="gpt-4.1-nano",
             input=dialog_history,
-            temperature=float(temperature),
-            store=True
+            temperature=float(temperature)
         )
 
         ai_message = response.output_text
@@ -129,8 +126,7 @@ def get_response(text: str, dialog_history: list, client: OpenAI):
     response = client.responses.create(
         model="gpt-4.1-nano",
         input=dialog_history,
-        temperature=float(temperature),
-        store=True
+        temperature=float(temperature)
     )
 
     ai_message = response.output_text
