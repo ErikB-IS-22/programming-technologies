@@ -29,8 +29,7 @@
             input=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_text}
-            ],
-            store=True
+            ]
         )
         return response.output_text
     ```
@@ -40,7 +39,7 @@
     Функция get_response отправляет запрос к API, используя системный промпт и текст, введённый пользователем. Ответ от модели возвращается и выводится на экран.
     **Результат работы:**
 
-    ![Системный промт](/Screenshots/Системный%20промт.png)
+    ![Системный промт](./Screenshots/Системный%20промт.png)
 
 
 2. **Работа с параметром `temperature`**:
@@ -58,8 +57,7 @@
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_text}
             ],
-            temperature=float(temperature),
-            store=True
+            temperature=float(temperature)
         )
         return response.output_text
     ```
@@ -67,11 +65,11 @@
    На gpt-5-nano не поддерживается изменение этого параметра, пришлось сменить на gpt=4.1-nano.
    Я использовал значение температуры 0.1 для получения более предсказуемых и стабильных ответов 
    
-   ![Системный промт](/Screenshots/Temprature%200.1.png) однако результат оказался схож с температурой 1.0 (дефолтное значение) 
+   ![Системный промт](./Screenshots/Temprature%200.1.png) однако результат оказался схож с температурой 1.0 (дефолтное значение) 
    
-   ![Системный промт](/Screenshots/Temprature%201.png) При температуре 2.0 модель начала генерировать более случайные и менее логичные ответы, иногда теряя тему и выдавая бессмысленные фразы на разных языках 
+   ![Системный промт](./Screenshots/Temprature%201.png) При температуре 2.0 модель начала генерировать более случайные и менее логичные ответы, иногда теряя тему и выдавая бессмысленные фразы на разных языках 
    
-   ![Системный промт](/Screenshots/Temprature%202.png)
+   ![Системный промт](./Screenshots/Temprature%202.png)
 3. **Ведение истории диалога (контекста переписки)**:
     ```
     prompt = os.getenv("SYSTEM_PROMPT")
@@ -90,8 +88,7 @@
         response = client.responses.create(
             model="gpt-4.1-nano",
             input=dialog_history,
-            temperature=float(temperature),
-            store=True
+            temperature=float(temperature)
         )
 
         ai_message = response.output_text
@@ -101,7 +98,7 @@
     ```
    Для того, чтобы ИИ помнил контекст общения с пользователем, была реализована система ведения истории диалога. Контекст переписки ограничивался 6 последними сообщениями (3 от пользователя и 3 от ИИ). Это позволяло модели помнить предыдущие вопросы и ответы, улучшая качество взаимодействия и позволяя более точно реагировать на новые запросы пользователя
    
-   ![Системный промт](/Screenshots/История%20сообщений.png)
+   ![Системный промт](./Screenshots/История%20сообщений.png)
 
 4. **Итоговый код**
 ```
@@ -129,8 +126,7 @@ def get_response(text: str, dialog_history: list, client: OpenAI):
     response = client.responses.create(
         model="gpt-4.1-nano",
         input=dialog_history,
-        temperature=float(temperature),
-        store=True
+        temperature=float(temperature)
     )
 
     ai_message = response.output_text
