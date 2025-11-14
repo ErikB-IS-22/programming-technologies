@@ -58,6 +58,40 @@ messages.append({"role": "user", "content": question})
 - Системный промпт всегда включён в messages, а значит — используется моделью при каждом запросе.
 
 ```
-![пронт](Screenshots/1.jpg)
+response = client.responses.create(
+    model="gpt-4o-mini",
+    input=messages
+)
 
 ```
+
+![пронт](Screenshots/1.jpg)
+
+## 5.
+
+- Параметр temperature управляет степенью «креативности» и вариативности ответа языковой модели.
+
+```
+temperature = float(os.getenv("TEMPERATURE"))
+```
+
+```
+response = client.responses.create(
+    model="gpt-4o-mini",
+    input=messages
+)
+```
+
+- Ниже приведён пример ответов с **значением temperature по умолчанию** и с **увеличенным значением**, чтобы продемонстрировать разницу в стиле и вариативности генерации текста.
+
+- TEMPERATURE=0.7
+
+![TEMPERATURE](Screenshots/2.jpg)
+
+- TEMPERATURE=1.3
+
+![TEMPERATURE](Screenshots/3.jpg)
+
+## 6. Ведение истории диалога
+
+- История диалога реализована в отдельном классе
