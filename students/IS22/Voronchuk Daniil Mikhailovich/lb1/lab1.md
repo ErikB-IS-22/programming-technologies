@@ -2,8 +2,6 @@
 
 <ins>Цель</ins>: научиться работать с OpenAI API, чтобы создать простого текстового ассистента, который может отвечать на ваши вопросы.
 
-![Чат](photos/lab1/chat.png)
-
 ---
 
 ## План
@@ -55,4 +53,11 @@ system_prompt = os.getenv("SYSTEM_PROMPT")
 messages = [{"role": "system", "content": system_prompt}]
 messages.extend(dialogue_history.get_messages())
 messages.append({"role": "user", "content": question})
+```
+
+- Системный промпт всегда включён в messages, а значит — используется моделью при каждом запросе.
+
+```
+![пронт](Screenshots/1.jpg)
+
 ```
