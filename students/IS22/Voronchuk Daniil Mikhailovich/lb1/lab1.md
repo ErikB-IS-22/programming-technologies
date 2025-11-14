@@ -38,7 +38,7 @@
 - Добавлена возможность выхода из программы по команде `exit`
 - Настроен вывод вопросов пользователя и ответов AI
 
-## 4. Дальше требовалось реализовать Использование системного промпта через переменную окружения `.env`
+### 4. Дальше требовалось реализовать Использование системного промпта через переменную окружения `.env`
 
 - В функции main() системный промпт считывается напрямую:
 
@@ -67,7 +67,7 @@ response = client.responses.create(
 
 ![пронт](Screenshots/1.jpg)
 
-## 5.
+## 5. Изменение параметра TEMPERATURE
 
 - Параметр temperature управляет степенью «креативности» и вариативности ответа языковой модели.
 
@@ -94,4 +94,63 @@ response = client.responses.create(
 
 ## 6. Ведение истории диалога
 
+- Реализована функция сохранения истории переписки пользователя с ассистентом. История сообщений хранится и используется для поддержания контекста диалога: модель «помнит» предыдущие сообщения и учитывает их при формировании новых ответов. Это позволяет улучшить качество взаимодействия, делая ответы более релевантными и последовательными, а также обеспечивает возможность анализа предыдущих диалогов.
+
 - История диалога реализована в отдельном классе
+
+```
+class DialogueHistory:
+    def __init__(self, max_messages: int = 6, filename: str = "dialogue_history.json"):
+        self.max_messages = max_messages
+        self.filename = filename
+        self.history: List[Dict] = []
+        self.load_history()
+```
+
+- Добавление нового сообщения
+
+```
+def add_message(self, role: str, content: str):
+    message = {
+        "role": role,
+        "content": content,
+        "timestamp": datetime.now().isoformat()
+    }
+    self.history.append(message)
+    
+    if len(self.history) > self.max_messages:
+        self.history = self.history[-self.max_messages:]
+    
+    self.save_history()
+
+```
+
+- Сохранение истории в JSON
+
+```
+def load_history(self):
+    if os.path.exists(self.filename):
+        with open(self.filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            self.history = data.get("messages", [])
+
+```
+
+Загрузка истории при старте
+
+```
+def load_history(self):
+    if os.path.exists(self.filename):
+        with open(self.filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            self.history = data.get("messages", [])
+
+```
+
+- Пример json файла
+
+![json](Screenshots/4.jpg)
+
+## Заключение
+
+- В ходе выполнения задания была реализована консольная версия чат-бота на Python с использованием OpenAI API, которая позволяет задавать системный промпт через файл .env, вести историю диалога с ограничением до последних 6 сообщений (3 пользовательских и 3 ответа ИИ) и управлять креативностью ответов с помощью параметра temperature; в результате ИИ сохраняет контекст переписки, корректно реагирует на системный промпт и демонстрирует различное поведение при изменении температуры, что полностью соответствует поставленным требованиям и обеспечивает удобство использования и гибкость настройки модели.
