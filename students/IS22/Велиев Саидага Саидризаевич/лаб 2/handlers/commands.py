@@ -2,7 +2,7 @@ from utils.loader import dp
 import logging
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
-from utils.gpt import dialog_history
+from utils.db_connect import save_dialog_history, get_dialog_history
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
@@ -15,8 +15,12 @@ async def command_start_handler(message: Message) -> None:
 async def reset_context(message: Message):
     user_id = message.from_user.id  # Получаем user_id из сообщения
 
-    if user_id in dialog_history:
-        dialog_history[user_id] = []  # Очищаем историю для данного пользователя
+    # Получаем историю диалога из базы данных
+    dialog_history_actual = get_dialog_history(user_id)
+
+    if dialog_history_actual:  # Если история найдена, сбрасываем её
+        dialog_history_actual = []  # Очищаем историю для данного пользователя
+        save_dialog_history(user_id, dialog_history_actual)  # Сохраняем пустую историю в БД
         await message.answer("История диалога сброшена. Можешь начинать новый разговор!")
     else:
         await message.answer("История не была найдена. Начни новый разговор!")

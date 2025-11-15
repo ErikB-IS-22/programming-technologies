@@ -52,35 +52,45 @@
 
 3. **Добавление хранения сообщений и поддержку контекста диалога**:
     ```
-    dialog_history = {}
+    def create_table():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS dialog_history (
+        user_id TEXT PRIMARY KEY,
+        history TEXT
+    )
+    ''')
+    conn.commit()
+    conn.close()
 
-    async def get_response(message: str, user_id: str, user_name: str, client: AsyncOpenAI) -> str:
-        dialog_history_actual = dialog_history.get(user_id, [])
+    create_table()
 
-        dialog_history_actual.append({"role": "user", "content": message})
+    def get_dialog_history(user_id: str):
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT history FROM dialog_history WHERE user_id = ?", (user_id,))
+        result = cursor.fetchone()
+        if result:
+            dialog_history = json.loads(result[0])
+        else:
+            dialog_history = []
+        conn.close()
+        return dialog_history
 
-        if len(dialog_history_actual) > 50:
-            dialog_history_actual.pop(0)
-
-        try:
-            response = await client.responses.create(
-                model="gpt-4.1-nano",
-                input=[{"role": "system", "content": prompt}] + [{"role": "user", "content": f"Пользователя зовут {user_name}"}] + dialog_history_actual,
-            )
-
-            dialog_history_actual.append({"role": "assistant", "content": response.output_text})
-
-            dialog_history[user_id] = dialog_history_actual
-
-            return response.output_text
-        except Exception as e:
-            logging.error(f"Error occurred: {e}")
-            return "Произошла ошибка при получении ответа"
-
+    def save_dialog_history(user_id: str, dialog_history_actual: list):
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT OR REPLACE INTO dialog_history (user_id, history)
+        VALUES (?, ?)
+        """, (user_id, json.dumps(dialog_history_actual)))
+        conn.commit()
+        conn.close()
     ```
    Для того, чтобы ИИ помнил контекст общения с пользователем, была реализована система ведения истории диалога. Контекст переписки ограничивался 50 последними сообщениями. У каждого пользователя свой отдельный список. 
 
-   Для упрощения задачи и быстрого прототипирования я решил использовать список, ну или если конкретно - словарь внутри Python для хранения истории сообщений, что позволяет эффективно управлять данными без необходимости подключения базы данных, обеспечивая при этом простоту реализации и ускорение процесса разработки, что идеально подходит для учебного прототипа.
+   Для упрощения задачи и быстрого прототипирования я решил использовать файл SQLite для хранения истории сообщений и подключаться к нему, что позволяет эффективно управлять данными без необходимости использования более сложных баз данных. Это обеспечило простоту реализации и ускорение процесса разработки, что идеально подходит для учебного прототипа.
 
 4. **Добавление команды /resetcontext, которая будет сбрасывать контекст диалога**
     ```
