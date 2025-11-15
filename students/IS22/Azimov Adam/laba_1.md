@@ -175,7 +175,3 @@ if __name__ == "__main__":
         gpt_answer = data.get("assistant")
         print("AI:", gpt_answer)
 ```
-
-```
-
-```
