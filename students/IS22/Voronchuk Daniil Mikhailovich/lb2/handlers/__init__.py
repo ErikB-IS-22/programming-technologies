@@ -1,4 +1,4 @@
-from .commands import dp
-from .messages import dp
+from . import commands
+from . import messages
 
 __all__ = ['dp']

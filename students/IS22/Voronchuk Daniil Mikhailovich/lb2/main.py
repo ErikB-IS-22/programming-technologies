@@ -1,8 +1,8 @@
 import asyncio
 import logging
 import sys
-from handlers import dp
-from utils.loader import bot
+from utils.loader import dp, bot
+import handlers  # Импортируем обработчики, чтобы декораторы сработали
 
 async def main():
     try:
@@ -13,3 +13,4 @@ async def main():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     asyncio.run(main())
+

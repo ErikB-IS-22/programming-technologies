@@ -1,13 +1,16 @@
 from utils.loader import dp
 import logging
-from aiogram.filters import CommandStart
+from aiogram.filters import Command
 from aiogram.types import Message
+from utils.db import reset_user_context
 
-@dp.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
+@dp.message(Command("reset-context"))
+async def reset_context_handler(message: Message):
     try:
-        await message.answer(f"Привет, {message.from_user.full_name}, я твой бот-ассистент! Можешь задавать мне вопросы, и я буду отвечать на них. \
-            Пожалуйста, помни про свой баланс на счету аккаунта в OpenAI и не ддось меня без необходимости)")
+        reset_user_context(message.from_user.id)
+        await message.answer("Контекст диалога сброшен!")
     except Exception as e:
         logging.error(f"Error occurred: {e}")
+        await message.answer("Не удалось сбросить контекст.")
+
     
