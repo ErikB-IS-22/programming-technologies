@@ -98,7 +98,7 @@ def get_dialog_prompt(list_messages: list, username: str):
 ### 1️⃣ Шаг 1 — Кнопка начать Диалог
 
 ![img](laba_2/images/image_1.png)
-Когда нажимают кнопку диалог начинается, бот спрашивает имя:
+#### Когда нажимают кнопку диалог начинается, бот спрашивает имя:
 
 ```python
 @dp.message(lambda message: message.text == start_dialog, StateFilter(UserState.waiting))
@@ -117,14 +117,14 @@ async def user_init(message: Message, state: FSMContext):
     await state.set_state(UserState.name)
 ```
 
-Бот переводит пользователя в состояние **ожидания имени**.
+#### Бот переводит пользователя в состояние **ожидания имени**.
 ![img](laba_2/images/image_2.png)
 
 ---
 
 ### 2️⃣ Шаг 2 — подтверждение имени
 
-После получения имени бот просит подтвердить его:
+#### После получения имени бот просит подтвердить его:
 ![img](laba_2/images/image_3.png)
 
 ```python
