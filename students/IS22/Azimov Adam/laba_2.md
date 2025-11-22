@@ -178,12 +178,18 @@ async def handle_callback_interaction(query: CallbackQuery, state: FSMContext):
 - Создаётся новый активный диалог.
 - Состояние сбрасывается.
 - FSM переходит в DialogState.active.
-  ![img](laba_2/images/image_4.png)
+
+####
+
+![img](laba_2/images/image_4.png)
 
 #### Если «Нет»:
 
 - FSM возвращается к вводу имени.
-  ![img](laba_2/images/image_5.png)
+
+####
+
+![img](laba_2/images/image_5.png)
 
 ## ✔️ 3. Хранение сообщений
 
