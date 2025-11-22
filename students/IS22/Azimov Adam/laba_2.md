@@ -110,9 +110,7 @@ def get_dialog_prompt(list_messages: list, username: str):
 async def user_init(message: Message, state: FSMContext):
     async with AsyncSessionLocal() as session:
         user = await UserDAO.find_one_or_none(db=session, telegram_id=str(message.from_user.id))
-
         dialogs = await DialogsDAO.find_all(db=session, user_id=user.id, is_active=True)
-
         if dialogs:
             update_data = [{"id": dialog.id, "is_active": False}
                            for dialog in dialogs]
@@ -138,7 +136,6 @@ async def activate_testing(message: Message, state: FSMContext):
     name = message.text
     await message.answer(f"Вы уверены, в имени?: {name}", reply_markup=inline_sure())
     await state.update_data(name=message.text)
-
     await state.set_state(UserState.sure)
 ```
 
@@ -257,11 +254,8 @@ volumes:
 ```python
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-
 from config import database_url
-
 engine = create_async_engine(database_url, echo=True)
-
 AsyncSessionLocal = sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -305,7 +299,6 @@ async def activate_testing(message: Message, state: FSMContext):
         answer = await get_response(prompt, client)
         assistant_answer = json.loads(
             "{"+answer[answer.find("{")+1:answer.rfind("}")]+"}")
-
         dialog.list_messages.append(assistant_answer)
         await DialogsDAO.update(db=session, model_id=dialog.id, list_messages=dialog.list_messages)
     await message.answer(assistant_answer.get("content"), reply_markup=reply_active_dialog())
@@ -332,8 +325,8 @@ async def create_bot(message: Message, state: FSMContext):
     async with AsyncSessionLocal() as session:
         user = await UserDAO.find_one_or_none(db=session, telegram_id=str(message.from_user.id))
         dialog = await DialogsDAO.find_one_or_none(db=session, user_id=user.id, is_active=True)
-
         await DialogsDAO.update(db=session, model_id=dialog.id, is_active=False)
+
     await state.set_state(UserState.waiting)
     await state.update_data(telegram_id=str(message.from_user.id))
     await message.answer(f"Вы завершили диалог", reply_markup=reply_not_dialog())
@@ -368,13 +361,14 @@ async def handle_callback_interaction(query: CallbackQuery, state: FSMContext):
     data: dict = await state.get_data()
     telegram_id = data.get('telegram_id')
     dialog_index = int(query.data.replace("dialog_", ""))
+
     async with AsyncSessionLocal() as session:
         user = await UserDAO.find_one_or_none(db=session, telegram_id=telegram_id)
         print(user)
         print(telegram_id)
         dialogs = await DialogsDAO.find_all(db=session, user_id=user.id)
-    dialog: Dialogs = dialogs[dialog_index-1]
 
+    dialog: Dialogs = dialogs[dialog_index-1]
     create_at = dialog.created_at.strftime("%d.%m.%Y %H:%M")
     update_at = dialog.created_at.strftime("%d.%m.%Y %H:%M")
     count_messages = len(dialog.list_messages)
@@ -393,7 +387,6 @@ async def handle_callback_interaction(query: CallbackQuery, state: FSMContext):
         role_name = dialog.username if msg.get(
             "role") == "user" else "Ассистент"
         content = msg.get("content", "").replace('\n', ' ')
-
         message_text += f"\n - <b>{role_name}:</b> {content}"
 
     await query.message.answer(message_text)
