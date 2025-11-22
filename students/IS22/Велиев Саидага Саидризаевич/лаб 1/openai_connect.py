@@ -22,8 +22,7 @@ def get_response(text: str, dialog_history: list, client: OpenAI):
     response = client.responses.create(
         model="gpt-4.1-nano",
         input=dialog_history,
-        temperature=float(temperature),
-        store=True
+        temperature=float(temperature)
     )
 
     ai_message = response.output_text
