@@ -171,17 +171,19 @@ async def handle_callback_interaction(query: CallbackQuery, state: FSMContext):
         await query.message.answer(f"Напишите, как мне к тебе обращаться")
 ```
 
-Если «Да»:
-Бот поздравляет пользователя.
-Имя сохраняется в базе.
-Создаётся новый активный диалог.
-Состояние сбрасывается.
-FSM переходит в DialogState.active.
-![img](laba_2/images/image_4.png)
+#### Если «Да»:
 
-Если «Нет»:
-FSM возвращается к вводу имени.
-![img](laba_2/images/image_5.png)
+- Бот поздравляет пользователя.
+- Имя сохраняется в базе.
+- Создаётся новый активный диалог.
+- Состояние сбрасывается.
+- FSM переходит в DialogState.active.
+  ![img](laba_2/images/image_4.png)
+
+#### Если «Нет»:
+
+- FSM возвращается к вводу имени.
+  ![img](laba_2/images/image_5.png)
 
 ## ✔️ 3. Хранение сообщений
 
