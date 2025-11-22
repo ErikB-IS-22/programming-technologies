@@ -254,7 +254,7 @@ volumes:
 
 #### Файл: database/dependency.py
 
-```
+```python
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -324,7 +324,7 @@ async def activate_testing(message: Message, state: FSMContext):
 
 ### Код реализации:
 
-```
+```python
 @dp.message(lambda message: message.text == end_dialog, StateFilter(DialogState.active))
 async def create_bot(message: Message, state: FSMContext):
     await state.clear()
