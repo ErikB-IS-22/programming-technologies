@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  ProgTech-bd:
+    image: postgres
+    container_name: progtech-bd
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "9700:5432"
+    volumes:
+      - progtech-bd-data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+volumes:
+  progtech-bd-data:
