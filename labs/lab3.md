@@ -655,6 +655,4 @@ def encode_query(
 ## 4. Задания
 
 1. Запустить описанный выше сценарий с помощью gpu. Нужно модифицировать конфиг под использование cuda-зависимостей.
-2. Реализовать чанкирование текста на основе токенов. Советую использовать библиотеку tiktoken.
-3. Добавить возможность работы с pdf файлами. Советую использовать библиотеку [pypdf](https://github.com/py-pdf/pypdf). В случае попытки реализации OCR подумайте в сторону библиотеки [pytesseract](https://pypi.org/project/pytesseract/). Для конвертации из doc/docx файлов можете использовать [docling](https://github.com/docling-project/docling).
-4. Реализовать полноценное API для работы с милвусом. Используйте [Django Rest Framework](https://docs.djangoproject.com/en/5.2/).
+2. Реализовать полноценное API для работы с милвусом. Используйте [Django Rest Framework](https://docs.djangoproject.com/en/5.2/).
