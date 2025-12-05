@@ -1,26 +1,28 @@
-import sqlite3
-
-conn = sqlite3.connect("chat.db")
-cursor = conn.cursor()
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS messages (
-    user_id INTEGER,
-    role TEXT,
-    content TEXT
-)
-""")
-conn.commit()
+from models import Message
+from db import SessionLocal
 
 def save_message(user_id: int, role: str, content: str):
-    cursor.execute("INSERT INTO messages (user_id, role, content) VALUES (?, ?, ?)",
-                   (user_id, role, content))
-    conn.commit()
+    session = SessionLocal()
+    msg = Message(user_id=user_id, role=role, content=content)
+    session.add(msg)
+    session.commit()
+    session.close()
+
 
 def get_user_messages(user_id: int):
-    cursor.execute("SELECT role, content FROM messages WHERE user_id=? ORDER BY rowid", (user_id,))
-    return cursor.fetchall()
+    session = SessionLocal()
+    messages = (
+        session.query(Message)
+        .filter(Message.user_id == user_id)
+        .order_by(Message.id)
+        .all()
+    )
+    session.close()
+    return [(m.role, m.content) for m in messages]
+
 
 def reset_user_context(user_id: int):
-    cursor.execute("DELETE FROM messages WHERE user_id=?", (user_id,))
-    conn.commit()
+    session = SessionLocal()
+    session.query(Message).filter(Message.user_id == user_id).delete()
+    session.commit()
+    session.close()
