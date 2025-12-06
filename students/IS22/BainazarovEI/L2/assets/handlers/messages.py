@@ -13,7 +13,6 @@ async def message_handler(message: Message) -> None:
         logging.error(f"Error occurred: {e}")
         await message.answer("Произошла ошибка при получении ответа")
 
-
 @dp.message(F.photo)
 async def photo_handler(message: Message) -> None:
     await message.answer("Вы отправили картинку!")
