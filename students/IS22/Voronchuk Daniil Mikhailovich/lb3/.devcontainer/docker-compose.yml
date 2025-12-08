@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   app:
@@ -10,11 +10,12 @@ services:
     volumes:
       - ../:/workspaces
     command: sleep infinity
-    # gpus: all        # чтобы эмбеддер видел видеокарту
+    gpus: all        
     depends_on:
       - standalone
     networks:
       - internal-network
+
 
   etcd:
     container_name: milvus-etcd
@@ -46,8 +47,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9001:9001" # console
-      - "9000:9000" # S3 API
+      - "9001:9001"   # console
+      - "9000:9000"   # S3 API
     volumes:
       - minio-data:/minio_data
     command: server /minio_data --console-address ":9001"
@@ -78,8 +79,8 @@ services:
       timeout: 20s
       retries: 3
     ports:
-      - "19530:19530" # Milvus gRPC
-      - "9091:9091" # Milvus HTTP
+      - "19530:19530"  # Milvus gRPC
+      - "9091:9091"    # Milvus HTTP
     depends_on:
       - etcd
       - minio
@@ -92,7 +93,7 @@ services:
     environment:
       MILVUS_URL: milvus-standalone:19530
     ports:
-      - "8000:3000" # браузер -> Attu
+      - "8000:3000"   # браузер -> Attu
     depends_on:
       - standalone
     networks:
