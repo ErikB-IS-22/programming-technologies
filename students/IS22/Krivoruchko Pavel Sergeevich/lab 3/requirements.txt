@@ -1,0 +1,6 @@
+django
+djangorestframework
+pymilvus
+sentence-transformers
+numpy
+torch==2.3.0+cu121
