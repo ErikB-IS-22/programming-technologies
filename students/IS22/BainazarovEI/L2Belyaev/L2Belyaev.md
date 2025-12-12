@@ -157,7 +157,8 @@ Image.fromarray(train_X[50]).resize((256,256))
 
 
     
-![png](output_15_0.png)
+![output_15_0](https://github.com/user-attachments/assets/197edc45-3594-4046-b94a-8b6787fbf91a)
+
     
 
 
@@ -384,8 +385,9 @@ print('Обучение закончено за %s секунд' % passed)
 
 
 
-    
-![png](output_23_1.png)
+
+<img width="1214" height="451" alt="output_23_1" src="https://github.com/user-attachments/assets/61047ff2-da56-476f-9701-8104f3ccc889" />
+
     
 
 
@@ -790,7 +792,8 @@ plt.ylabel('CCE, log10')
 
 
     
-![png](output_35_1.png)
+<img width="570" height="432" alt="output_35_1" src="https://github.com/user-attachments/assets/51bba262-99e4-4003-b29f-0724d600f97c" />
+
     
 
 
@@ -864,7 +867,8 @@ plt.show()
 
 
     
-![png](output_39_0.png)
+<img width="712" height="698" alt="output_39_0" src="https://github.com/user-attachments/assets/8b26abd9-7378-4cf7-ae79-eb402907e8fa" />
+
     
 
 
@@ -895,8 +899,9 @@ ax.view_init(40, -30)
 ```
 
 
-    
-![png](output_41_0.png)
+
+<img width="658" height="645" alt="output_41_0" src="https://github.com/user-attachments/assets/192e108d-c6d3-44cd-9139-6ff7ae16356b" />
+
     
 
 
