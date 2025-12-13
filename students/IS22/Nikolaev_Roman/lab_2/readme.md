@@ -22,7 +22,7 @@
 1. **Добавление к ассистенту системный промпт**:
     
     ```py
-    from config import OPENAI_API_KEY, SYSTEM_PROMPT
+    from config import OPENAI_API_KEY, SYSTEM_PROMPT, TEMPERATURE
 
     async def get_response(
         message: str, username: str, context_data: str, client: AsyncOpenAI
@@ -37,14 +37,14 @@
 
             response = await client.responses.create(
                 model="gpt-4.1-nano",
-                input=full_message,
+                input=message,
                 instructions=personalized_prompt,
-                temperature=0.8,
+                temperature=TEMPERATURE,
             )
             return response.output_text
     ```
 
-    Переменная SYSTEM_PROMPT='Ты полезный ассистент. Общайся с пользователем по имени {username}, отвечай на его вопросы.' извлекается из файла .env с помощью os.getenv("SYSTEM_PROMPT"). Системный промпт помогает задавать общий контекст для общения с моделью, например, как она должна вести себя.
+    Переменная SYSTEM_PROMPT='Ты полезный и вежливый ассистент. Отвечай ясно, кратко и по делу. Стремись быть понятным, избегай лишней воды. Если вопрос пользователя неполный — уточняй детали. Если можешь дать полезный совет, делай это. Ты сейчас общаешься с пользователем по имени {username}. Используй обращение по имени при первом приветствии или если пользователь сам попросит обратиться в нему по имени.' извлекается из файла .env с помощью os.getenv("SYSTEM_PROMPT"). Системный промпт помогает задавать общий контекст для общения с моделью, например, как она должна вести себя.
 
     **Результат работы:**
 
@@ -56,20 +56,15 @@
 2. **Добавление функции обращения к пользователю по имени**:
     Для того чтобы бот знал имя пользователя, используем атрибут message.from_user.full_name
     ```py
+    @dp.message()
     async def message_handler(message: Message) -> None:
-    try:
-        if message.photo:
-            await message.answer(
-                "Вы отправили картинку! К сожалению, я не могу обрабатывать изображения."
-            )
-            return
+        try:
+            username = message.from_user.full_name if message.from_user else "Пользователь"
+            user_id = message.from_user.id if message.from_user else 0
 
-        username = message.from_user.full_name if message.from_user else "Пользователь"
-        user_id = message.from_user.id if message.from_user else 0
+            context_data = db_manager.get_user_context(user_id)
 
-        context_data = db_manager.get_user_context(user_id)
-
-        response = await get_response(message.text, username, context_data, client)
+            response = await get_response(message.text, username, context_data, client)
     ```
     и передаем в функцию запроса к ChatGPT через системный промт
     ```py
@@ -88,7 +83,7 @@
                 model="gpt-4.1-nano",
                 input=full_message,
                 instructions=personalized_prompt,
-                temperature=0.8,
+                temperature=TEMPERATURE,
             )
             return response.output_text
     ```
@@ -104,27 +99,39 @@
 
         id = Column(Integer, primary_key=True, index=True)
         user_id = Column(Integer, index=True)
-        username = Column(String, index=True)
-        message_text = Column(Text)
-        response_text = Column(Text)
-        timestamp = Column(DateTime, default=func.now())
+        username = Column(String)
+        user_message = Column(Text)
+        assistant_message = Column(Text)
+        created_at = Column(DateTime, default=func.now())
+        in_history = Column(Boolean, default=True)
 
-        def __repr__(self):
-            return f"<Message(user_id={self.user_id}, username='{self.username}', message='{self.message_text[:50]}...')>"
+    class DatabaseManager:
+        def get_last_messages(self, user_id: int, limit: int = 5) -> list[dict]:
+            session = self.SessionLocal()
+            try:
+                msgs = (
+                    session.query(Message)
+                    .filter(Message.user_id == user_id, Message.in_history == True)
+                    .order_by(Message.created_at.desc())
+                    .limit(limit)
+                    .all()
+                )
 
+                msgs = list(reversed(msgs))
 
-    class DialogContext(Base):
-        __tablename__ = "dialog_contexts"
-
-        id = Column(Integer, primary_key=True, index=True)
-        user_id = Column(Integer, unique=True, index=True)
-        context_data = Column(Text)
-        updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-        def __repr__(self):
-            return f"<DialogContext(user_id={self.user_id})>"
+                result = []
+                for msg in msgs:
+                    result.append(
+                        {
+                            "user_message": msg.user_message,
+                            "assistant_message": msg.assistant_message,
+                        }
+                    )
+                return result
+            finally:
+                session.close()
     ```
-   Для того, чтобы ИИ помнил контекст общения с пользователем, была реализована система ведения истории диалога. Контекст переписки ограничивался 2000 токенами. У каждого пользователя свой сохраненный контекст. 
+   Для того, чтобы ИИ помнил контекст общения с пользователем, была реализована система ведения истории диалога. История ограницивается 10 последними сообщениями. У каждого пользователя свой сохраненный контекст. 
 
    Для упрощения задачи и быстрого прототипирования я решил использовать файл SQLite для хранения истории сообщений и подключаться к нему, что позволяет эффективно управлять данными без необходимости использования более сложных баз данных. Это обеспечило простоту реализации и ускорение процесса разработки, что идеально подходит для учебного прототипа.
 
@@ -134,34 +141,32 @@
     async def command_reset_context_handler(message: Message) -> None:
         try:
             user_id = message.from_user.id
-            db_manager.reset_user_context(user_id)
+            db_manager.clear_history(user_id)
+            file_path = f"data_json/history_{user_id}.json"
+            if os.path.exists(file_path):
+                with open(file_path, "w", encoding="utf-8") as f:
+                    json.dump([], f, ensure_ascii=False, indent=2)
+
             await message.answer("Контекст диалога успешно сброшен.")
         except Exception as e:
             logging.error(f"Error occurred: {e}")
             await message.answer("Произошла ошибка при сбросе контекста диалога.")
     ```
     ```py
-    def reset_user_context(self, user_id: int) -> bool:
-        """Сбросить контекст диалога пользователя"""
-        session = self.get_session()
+    def clear_history(self, user_id: int) -> int:
+        session = self.SessionLocal()
         try:
-            context = (
-                session.query(DialogContext)
-                .filter(DialogContext.user_id == user_id)
-                .first()
+            updated_count = (
+                session.query(Message)
+                .filter(Message.user_id == user_id, Message.in_history == True)
+                .update({"in_history": False})
             )
-            if context:
-                session.delete(context)
-                session.commit()
-            return True
-        except SQLAlchemyError as e:
-            logging.error(f"Error resetting user context: {e}")
-            session.rollback()
-            return False
+            session.commit()
+            return updated_count
         finally:
             session.close()
     ```
-    Для реализации команды `/reset_context`, которая сбрасывает контекст диалога, я создал обработчик для этой команды, который проверяет, есть ли сохраненная история для конкретного пользователя, используя его уникальный `user_id`. Когда пользователь отправляет команду `/resetcontext`, я извлекаю его user_id из сообщения с помощью `message.from_user.id`. Затем, проверяя, существует ли история диалога этого `user_id` в таблице, я удаляю соответствующую запись в таблице. После этого отправляется сообщение, подтверждающее, что история была сброшена и можно начать новый разговор.
+    Для реализации команды `/reset_context`, которая сбрасывает контекст диалога, я создал обработчик для этой команды, который проверяет, есть ли сохраненная история для конкретного пользователя, используя его уникальный `user_id`. Когда пользователь отправляет команду `/resetcontext`, я извлекаю его user_id из сообщения с помощью `message.from_user.id`. Затем, проверяя, существует ли история диалога этого `user_id` в таблице, я меняю флаг у сообщений, чтобы они больше не использовались в истории и также отчищаю JSON, который хранит историю в рамках одной сессии. После этого отправляется сообщение, подтверждающее, что история была сброшена и можно начать новый разговор.
 
     ![img](assets/image_2.png)
 
