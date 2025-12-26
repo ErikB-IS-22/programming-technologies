@@ -504,7 +504,7 @@ torch.onnx.export(model,               # модель
                   x,                   # входной тензор (или кортеж нескольких тензоров)
                   "cifar100_CNN.onnx", # куда сохранить (либо путь к файлу либо fileObject)
                   export_params=True,  # сохраняет веса обученных параметров внутри файла модели
-                  opset_version=9,     # версия ONNX
+                  opset_version=16,     # версия ONNX
                   do_constant_folding=True,  # следует ли выполнять укорачивание констант для оптимизации
                   input_names = ['input'],   # имя входного слоя
                   output_names = ['output'],  # имя выходного слоя
@@ -512,159 +512,142 @@ torch.onnx.export(model,               # модель
                                 'output' : {0 : 'batch_size'}})
 ```
 
-    /tmp/ipython-input-4097618590.py:6: UserWarning: # 'dynamic_axes' is not recommended when dynamo=True, and may lead to 'torch._dynamo.exc.UserError: Constraints violated.' Supply the 'dynamic_shapes' argument instead if export is unsuccessful.
-      torch.onnx.export(model,               # модель
-    W1125 12:28:36.186000 812 torch/onnx/_internal/exporter/_compat.py:114] Setting ONNX exporter to use operator set version 18 because the requested opset_version 9 is a lower version than we have implementations for. Automatic version conversion will be performed, which may not be successful at converting to the requested version. If version conversion is unsuccessful, the opset version of the exported model will be kept at 18. Please consider setting opset_version >=18 to leverage latest ONNX features
-    
+ /tmp/ipython-input-1386216986.py:6: UserWarning: # 'dynamic_axes' is not recommended when dynamo=True, and may lead to 'torch._dynamo.exc.UserError: Constraints violated.' Supply the 'dynamic_shapes' argument instead if export is unsuccessful.
+  torch.onnx.export(model,               # модель
+W1226 17:39:36.634000 2893 torch/onnx/_internal/exporter/_compat.py:114] Setting ONNX exporter to use operator set version 18 because the requested opset_version 16 is a lower version than we have implementations for. Automatic version conversion will be performed, which may not be successful at converting to the requested version. If version conversion is unsuccessful, the opset version of the exported model will be kept at 18. Please consider setting opset_version >=18 to leverage latest ONNX features
+[torch.onnx] Obtain model graph for `Cifar100_CNN([...]` with `torch.export.export(..., strict=False)`...
+[torch.onnx] Obtain model graph for `Cifar100_CNN([...]` with `torch.export.export(..., strict=False)`... ✅
+[torch.onnx] Run decomposition...
+WARNING:onnxscript.version_converter:The model version conversion is not supported by the onnxscript version converter and fallback is enabled. The model will be converted using the onnx C API (target version: 16).
+[torch.onnx] Run decomposition... ✅
+[torch.onnx] Translate the graph into ONNX...
+[torch.onnx] Translate the graph into ONNX... ✅
+ONNXProgram(
+    model=
+        <
+            ir_version=10,
+            opset_imports={'': 16},
+            producer_name='pytorch',
+            producer_version='2.9.0+cu126',
+            domain=None,
+            model_version=None,
+        >
+        graph(
+            name=main_graph,
+            inputs=(
+                %"input"<FLOAT,[s31,32,32,3]>
+            ),
+            outputs=(
+                %"output"<FLOAT,[1,3]>
+            ),
+            initializers=(
+                %"seq.1.bias"<FLOAT,[32]>{TorchTensor(...)},
+                %"seq.3.bias"<FLOAT,[64]>{TorchTensor(...)},
+                %"seq.5.bias"<FLOAT,[128]>{TorchTensor(...)},
+                %"seq.8.bias"<FLOAT,[3]>{TorchTensor<FLOAT,[3]>(Parameter containing: tensor([-0.3263,  0.3473, -0.0554], device='cuda:0', requires_grad=True), name='seq.8.bias')},
+                %"seq.0.mean"<FLOAT,[3]>{TorchTensor<FLOAT,[3]>(tensor([0.5074, 0.4867, 0.4411], device='cuda:0'), name='seq.0.mean')},
+                %"seq.0.std"<FLOAT,[3]>{TorchTensor<FLOAT,[3]>(tensor([0.2011, 0.1987, 0.2025], device='cuda:0'), name='seq.0.std')},
+                %"seq.1.weight"<FLOAT,[32,3,5,5]>{TorchTensor(...)},
+                %"seq.3.weight"<FLOAT,[64,32,3,3]>{TorchTensor(...)},
+                %"seq.5.weight"<FLOAT,[128,64,3,3]>{TorchTensor(...)},
+                %"seq.8.weight"<FLOAT,[3,512]>{TorchTensor(...)},
+                %"val_4"<INT64,[2]>{Tensor<INT64,[2]>(array([  1, 512]), name='val_4')},
+                %"val_0"<FLOAT,[]>{TensorProtoTensor<FLOAT,[]>(array(255., dtype=float32), name='val_0')}
+            ),
+        ) {
+             0 |  # node_div
+                  %"div"<FLOAT,[s31,32,32,3]> ⬅️ ::Div(%"input", %"val_0"{255.0})
+             1 |  # node_sub_1
+                  %"sub_1"<FLOAT,[1,32,32,3]> ⬅️ ::Sub(%"div", %"seq.0.mean"{[0.5073999762535095, 0.48669999837875366, 0.44110000133514404]})
+             2 |  # node_div_1
+                  %"div_1"<FLOAT,[1,32,32,3]> ⬅️ ::Div(%"sub_1", %"seq.0.std"{[0.20110000669956207, 0.19869999587535858, 0.20250000059604645]})
+             3 |  # node_permute
+                  %"permute"<FLOAT,[1,3,32,32]> ⬅️ ::Transpose(%"div_1") {perm=(0, 3, 1, 2)}
+             4 |  # node_conv2d
+                  %"conv2d"<FLOAT,[1,32,8,8]> ⬅️ ::Conv(%"permute", %"seq.1.weight"{...}, %"seq.1.bias"{...}) {group=1, pads=(2, 2, 2, 2), auto_pad='NOTSET', strides=(4, 4), dilations=(1, 1)}
+             5 |  # node_relu
+                  %"relu"<FLOAT,[1,32,8,8]> ⬅️ ::Relu(%"conv2d")
+             6 |  # node_conv2d_1
+                  %"conv2d_1"<FLOAT,[1,64,4,4]> ⬅️ ::Conv(%"relu", %"seq.3.weight"{...}, %"seq.3.bias"{...}) {group=1, pads=(1, 1, 1, 1), auto_pad='NOTSET', strides=(2, 2), dilations=(1, 1)}
+             7 |  # node_relu_1
+                  %"relu_1"<FLOAT,[1,64,4,4]> ⬅️ ::Relu(%"conv2d_1")
+             8 |  # node_conv2d_2
+                  %"conv2d_2"<FLOAT,[1,128,2,2]> ⬅️ ::Conv(%"relu_1", %"seq.5.weight"{...}, %"seq.5.bias"{...}) {group=1, pads=(1, 1, 1, 1), auto_pad='NOTSET', strides=(2, 2), dilations=(1, 1)}
+             9 |  # node_relu_2
+                  %"relu_2"<FLOAT,[1,128,2,2]> ⬅️ ::Relu(%"conv2d_2")
+            10 |  # node__unsafe_view
+                  %"_unsafe_view"<FLOAT,[1,512]> ⬅️ ::Reshape(%"relu_2", %"val_4"{[1, 512]}) {allowzero=1}
+            11 |  # node_linear
+                  %"output"<FLOAT,[1,3]> ⬅️ ::Gemm(%"_unsafe_view", %"seq.8.weight"{...}, %"seq.8.bias"{[-0.32634788751602173, 0.3472962975502014, -0.055435847491025925]}) {beta=1.0, transB=1, alpha=1.0, transA=0}
+            return %"output"<FLOAT,[1,3]>
+        }
 
-    [torch.onnx] Obtain model graph for `Cifar100_CNN([...]` with `torch.export.export(..., strict=False)`...
-    [torch.onnx] Obtain model graph for `Cifar100_CNN([...]` with `torch.export.export(..., strict=False)`... ✅
-    [torch.onnx] Run decomposition...
-    
 
-    WARNING:onnxscript.version_converter:The model version conversion is not supported by the onnxscript version converter and fallback is enabled. The model will be converted using the onnx C API (target version: 9).
-    WARNING:onnxscript.version_converter:Failed to convert the model to the target version 9 using the ONNX C API. The model was not modified
-    Traceback (most recent call last):
-      File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/__init__.py", line 127, in call
-        converted_proto = _c_api_utils.call_onnx_api(
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/_c_api_utils.py", line 65, in call_onnx_api
-        result = func(proto)
-                 ^^^^^^^^^^^
-      File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/__init__.py", line 122, in _partial_convert_version
-        return onnx.version_converter.convert_version(
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      File "/usr/local/lib/python3.12/dist-packages/onnx/version_converter.py", line 39, in convert_version
-        converted_model_str = C.convert_version(model_str, target_version)
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    RuntimeError: /github/workspace/onnx/version_converter/BaseConverter.h:68: adapter_lookup: Assertion `false` failed: No Adapter From Version $16 for Identity
+    ,
+    exported_program=
+        ExportedProgram:
+            class GraphModule(torch.nn.Module):
+                def forward(self, p_seq_1_weight: "f32[32, 3, 5, 5]", p_seq_1_bias: "f32[32]", p_seq_3_weight: "f32[64, 32, 3, 3]", p_seq_3_bias: "f32[64]", p_seq_5_weight: "f32[128, 64, 3, 3]", p_seq_5_bias: "f32[128]", p_seq_8_weight: "f32[3, 512]", p_seq_8_bias: "f32[3]", c_seq_0_mean: "f32[3]", c_seq_0_std: "f32[3]", input: "f32[s31, 32, 32, 3]"):
+                    input_1 = input
+            
+                     # File: /tmp/ipython-input-3043060065.py:8 in forward, code: x = input / 255.0
+                    div: "f32[s31, 32, 32, 3]" = torch.ops.aten.div.Tensor(input_1, 255.0);  input_1 = None
+            
+                     # File: /tmp/ipython-input-3043060065.py:9 in forward, code: x = x - self.mean
+                    sub_1: "f32[1, 32, 32, 3]" = torch.ops.aten.sub.Tensor(div, c_seq_0_mean);  div = c_seq_0_mean = None
+            
+                     # File: /tmp/ipython-input-3043060065.py:10 in forward, code: x = x / self.std
+                    div_1: "f32[1, 32, 32, 3]" = torch.ops.aten.div.Tensor(sub_1, c_seq_0_std);  sub_1 = c_seq_0_std = None
+            
+                     # File: /tmp/ipython-input-3043060065.py:11 in forward, code: return x.permute(0, 3, 1, 2) # nhwc -> nm
+                    permute: "f32[1, 3, 32, 32]" = torch.ops.aten.permute.default(div_1, [0, 3, 1, 2]);  div_1 = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:548 in forward, code: return self._conv_forward(input, self.weight, self.bias)
+                    conv2d: "f32[1, 32, 8, 8]" = torch.ops.aten.conv2d.default(permute, p_seq_1_weight, p_seq_1_bias, [4, 4], [2, 2]);  permute = p_seq_1_weight = p_seq_1_bias = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/activation.py:144 in forward, code: return F.relu(input, inplace=self.inplace)
+                    relu: "f32[1, 32, 8, 8]" = torch.ops.aten.relu.default(conv2d);  conv2d = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:548 in forward, code: return self._conv_forward(input, self.weight, self.bias)
+                    conv2d_1: "f32[1, 64, 4, 4]" = torch.ops.aten.conv2d.default(relu, p_seq_3_weight, p_seq_3_bias, [2, 2], [1, 1]);  relu = p_seq_3_weight = p_seq_3_bias = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/activation.py:144 in forward, code: return F.relu(input, inplace=self.inplace)
+                    relu_1: "f32[1, 64, 4, 4]" = torch.ops.aten.relu.default(conv2d_1);  conv2d_1 = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:548 in forward, code: return self._conv_forward(input, self.weight, self.bias)
+                    conv2d_2: "f32[1, 128, 2, 2]" = torch.ops.aten.conv2d.default(relu_1, p_seq_5_weight, p_seq_5_bias, [2, 2], [1, 1]);  relu_1 = p_seq_5_weight = p_seq_5_bias = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/activation.py:144 in forward, code: return F.relu(input, inplace=self.inplace)
+                    relu_2: "f32[1, 128, 2, 2]" = torch.ops.aten.relu.default(conv2d_2);  conv2d_2 = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/flatten.py:56 in forward, code: return input.flatten(self.start_dim, self.end_dim)
+                    clone: "f32[1, 128, 2, 2]" = torch.ops.aten.clone.default(relu_2, memory_format = torch.contiguous_format);  relu_2 = None
+                    _unsafe_view: "f32[1, 512]" = torch.ops.aten._unsafe_view.default(clone, [1, 512]);  clone = None
+            
+                     # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py:134 in forward, code: return F.linear(input, self.weight, self.bias)
+                    linear: "f32[1, 3]" = torch.ops.aten.linear.default(_unsafe_view, p_seq_8_weight, p_seq_8_bias);  _unsafe_view = p_seq_8_weight = p_seq_8_bias = None
+                    return (linear,)
+            
+        Graph signature: 
+            # inputs
+            p_seq_1_weight: PARAMETER target='seq.1.weight'
+            p_seq_1_bias: PARAMETER target='seq.1.bias'
+            p_seq_3_weight: PARAMETER target='seq.3.weight'
+            p_seq_3_bias: PARAMETER target='seq.3.bias'
+            p_seq_5_weight: PARAMETER target='seq.5.weight'
+            p_seq_5_bias: PARAMETER target='seq.5.bias'
+            p_seq_8_weight: PARAMETER target='seq.8.weight'
+            p_seq_8_bias: PARAMETER target='seq.8.bias'
+            c_seq_0_mean: CONSTANT_TENSOR target='seq.0.mean'
+            c_seq_0_std: CONSTANT_TENSOR target='seq.0.std'
+            input: USER_INPUT
     
-
-    [torch.onnx] Run decomposition... ✅
-    [torch.onnx] Translate the graph into ONNX...
-    [torch.onnx] Translate the graph into ONNX... ✅
+            # outputs
+            linear: USER_OUTPUT
     
+        Range constraints: {s31: VR[0, 2]}
 
-
-
-
-    ONNXProgram(
-        model=
-            <
-                ir_version=10,
-                opset_imports={'': 18},
-                producer_name='pytorch',
-                producer_version='2.9.0+cu126',
-                domain=None,
-                model_version=None,
-            >
-            graph(
-                name=main_graph,
-                inputs=(
-                    %"input"<FLOAT,[s31,32,32,3]>
-                ),
-                outputs=(
-                    %"output"<FLOAT,[1,3]>
-                ),
-                initializers=(
-                    %"seq.1.bias"<FLOAT,[32]>{TorchTensor(...)},
-                    %"seq.3.bias"<FLOAT,[64]>{TorchTensor(...)},
-                    %"seq.7.weight"<FLOAT,[3,256]>{TorchTensor(...)},
-                    %"seq.7.bias"<FLOAT,[3]>{TorchTensor<FLOAT,[3]>(Parameter containing: tensor([-0.4037,  0.3866, -0.0183], device='cuda:0', requires_grad=True), name='seq.7.bias')},
-                    %"seq.0.mean"<FLOAT,[3]>{TorchTensor<FLOAT,[3]>(tensor([0.5074, 0.4867, 0.4411], device='cuda:0'), name='seq.0.mean')},
-                    %"seq.0.std"<FLOAT,[3]>{TorchTensor<FLOAT,[3]>(tensor([0.2011, 0.1987, 0.2025], device='cuda:0'), name='seq.0.std')},
-                    %"seq.1.weight"<FLOAT,[32,3,5,5]>{TorchTensor(...)},
-                    %"seq.3.weight"<FLOAT,[64,32,3,3]>{TorchTensor(...)},
-                    %"val_4"<INT64,[2]>{Tensor<INT64,[2]>(array([  1, 256]), name='val_4')},
-                    %"val_0"<FLOAT,[]>{Tensor<FLOAT,[]>(array(255., dtype=float32), name='val_0')}
-                ),
-            ) {
-                 0 |  # node_div
-                      %"div"<FLOAT,[s31,32,32,3]> ⬅️ ::Div(%"input", %"val_0"{255.0})
-                 1 |  # node_sub_1
-                      %"sub_1"<FLOAT,[1,32,32,3]> ⬅️ ::Sub(%"div", %"seq.0.mean"{[0.5073999762535095, 0.48669999837875366, 0.44110000133514404]})
-                 2 |  # node_div_1
-                      %"div_1"<FLOAT,[1,32,32,3]> ⬅️ ::Div(%"sub_1", %"seq.0.std"{[0.20110000669956207, 0.19869999587535858, 0.20250000059604645]})
-                 3 |  # node_permute
-                      %"permute"<FLOAT,[1,3,32,32]> ⬅️ ::Transpose(%"div_1") {perm=(0, 3, 1, 2)}
-                 4 |  # node_conv2d
-                      %"conv2d"<FLOAT,[1,32,8,8]> ⬅️ ::Conv(%"permute", %"seq.1.weight"{...}, %"seq.1.bias"{...}) {group=1, pads=(2, 2, 2, 2), auto_pad='NOTSET', strides=(4, 4), dilations=(1, 1)}
-                 5 |  # node_relu
-                      %"relu"<FLOAT,[1,32,8,8]> ⬅️ ::Relu(%"conv2d")
-                 6 |  # node_conv2d_1
-                      %"conv2d_1"<FLOAT,[1,64,8,8]> ⬅️ ::Conv(%"relu", %"seq.3.weight"{...}, %"seq.3.bias"{...}) {group=1, pads=(1, 1, 1, 1), auto_pad='NOTSET', strides=(1, 1), dilations=(1, 1)}
-                 7 |  # node_relu_1
-                      %"relu_1"<FLOAT,[1,64,8,8]> ⬅️ ::Relu(%"conv2d_1")
-                 8 |  # node_avg_pool2d
-                      %"avg_pool2d"<FLOAT,[1,64,2,2]> ⬅️ ::AveragePool(%"relu_1") {count_include_pad=1, ceil_mode=0, pads=(0, 0, 0, 0), auto_pad='NOTSET', strides=(4, 4), kernel_shape=(4, 4)}
-                 9 |  # node__unsafe_view
-                      %"_unsafe_view"<FLOAT,[1,256]> ⬅️ ::Reshape(%"avg_pool2d", %"val_4"{[1, 256]}) {allowzero=1}
-                10 |  # node_linear
-                      %"output"<FLOAT,[1,3]> ⬅️ ::Gemm(%"_unsafe_view", %"seq.7.weight"{...}, %"seq.7.bias"{[-0.4037117660045624, 0.3865662217140198, -0.018256712704896927]}) {beta=1.0, transB=1, alpha=1.0, transA=0}
-                return %"output"<FLOAT,[1,3]>
-            }
-    
-    
-        ,
-        exported_program=
-            ExportedProgram:
-                class GraphModule(torch.nn.Module):
-                    def forward(self, p_seq_1_weight: "f32[32, 3, 5, 5]", p_seq_1_bias: "f32[32]", p_seq_3_weight: "f32[64, 32, 3, 3]", p_seq_3_bias: "f32[64]", p_seq_7_weight: "f32[3, 256]", p_seq_7_bias: "f32[3]", c_seq_0_mean: "f32[3]", c_seq_0_std: "f32[3]", input: "f32[s31, 32, 32, 3]"):
-                        input_1 = input
-                
-                         # File: /tmp/ipython-input-3457641508.py:8 in forward, code: x = input / 255.0
-                        div: "f32[s31, 32, 32, 3]" = torch.ops.aten.div.Tensor(input_1, 255.0);  input_1 = None
-                
-                         # File: /tmp/ipython-input-3457641508.py:9 in forward, code: x = x - self.mean
-                        sub_1: "f32[1, 32, 32, 3]" = torch.ops.aten.sub.Tensor(div, c_seq_0_mean);  div = c_seq_0_mean = None
-                
-                         # File: /tmp/ipython-input-3457641508.py:10 in forward, code: x = x / self.std
-                        div_1: "f32[1, 32, 32, 3]" = torch.ops.aten.div.Tensor(sub_1, c_seq_0_std);  sub_1 = c_seq_0_std = None
-                
-                         # File: /tmp/ipython-input-3457641508.py:11 in forward, code: return x.permute(0, 3, 1, 2) # nhwc -> nm
-                        permute: "f32[1, 3, 32, 32]" = torch.ops.aten.permute.default(div_1, [0, 3, 1, 2]);  div_1 = None
-                
-                         # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:548 in forward, code: return self._conv_forward(input, self.weight, self.bias)
-                        conv2d: "f32[1, 32, 8, 8]" = torch.ops.aten.conv2d.default(permute, p_seq_1_weight, p_seq_1_bias, [4, 4], [2, 2]);  permute = p_seq_1_weight = p_seq_1_bias = None
-                
-                         # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/activation.py:144 in forward, code: return F.relu(input, inplace=self.inplace)
-                        relu: "f32[1, 32, 8, 8]" = torch.ops.aten.relu.default(conv2d);  conv2d = None
-                
-                         # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/conv.py:548 in forward, code: return self._conv_forward(input, self.weight, self.bias)
-                        conv2d_1: "f32[1, 64, 8, 8]" = torch.ops.aten.conv2d.default(relu, p_seq_3_weight, p_seq_3_bias, [1, 1], [1, 1]);  relu = p_seq_3_weight = p_seq_3_bias = None
-                
-                         # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/activation.py:144 in forward, code: return F.relu(input, inplace=self.inplace)
-                        relu_1: "f32[1, 64, 8, 8]" = torch.ops.aten.relu.default(conv2d_1);  conv2d_1 = None
-                
-                         # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/pooling.py:781 in forward, code: return F.avg_pool2d(
-                        avg_pool2d: "f32[1, 64, 2, 2]" = torch.ops.aten.avg_pool2d.default(relu_1, [4, 4], [4, 4]);  relu_1 = None
-                
-                         # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/flatten.py:56 in forward, code: return input.flatten(self.start_dim, self.end_dim)
-                        clone: "f32[1, 64, 2, 2]" = torch.ops.aten.clone.default(avg_pool2d, memory_format = torch.contiguous_format);  avg_pool2d = None
-                        _unsafe_view: "f32[1, 256]" = torch.ops.aten._unsafe_view.default(clone, [1, 256]);  clone = None
-                
-                         # File: /usr/local/lib/python3.12/dist-packages/torch/nn/modules/linear.py:134 in forward, code: return F.linear(input, self.weight, self.bias)
-                        linear: "f32[1, 3]" = torch.ops.aten.linear.default(_unsafe_view, p_seq_7_weight, p_seq_7_bias);  _unsafe_view = p_seq_7_weight = p_seq_7_bias = None
-                        return (linear,)
-                
-            Graph signature: 
-                # inputs
-                p_seq_1_weight: PARAMETER target='seq.1.weight'
-                p_seq_1_bias: PARAMETER target='seq.1.bias'
-                p_seq_3_weight: PARAMETER target='seq.3.weight'
-                p_seq_3_bias: PARAMETER target='seq.3.bias'
-                p_seq_7_weight: PARAMETER target='seq.7.weight'
-                p_seq_7_bias: PARAMETER target='seq.7.bias'
-                c_seq_0_mean: CONSTANT_TENSOR target='seq.0.mean'
-                c_seq_0_std: CONSTANT_TENSOR target='seq.0.std'
-                input: USER_INPUT
-        
-                # outputs
-                linear: USER_OUTPUT
-        
-            Range constraints: {s31: VR[0, 2]}
-    
-    )
+)
 
 ---
 
