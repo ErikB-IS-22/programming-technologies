@@ -360,15 +360,30 @@ print('Обучение закончено за %s секунд' % passed)
       0%|          | 0/6000 [00:00<?, ?it/s]
 
 
+batch_size = 128
 
+<img width="974" height="390" alt="image" src="https://github.com/user-attachments/assets/c21f4edd-172b-4b51-9a2e-40a96f53a368" />
 
-<img width="1214" height="451" alt="output_23_1" src="https://github.com/user-attachments/assets/61047ff2-da56-476f-9701-8104f3ccc889" />
+batch_size = 64
 
-    
+<img width="974" height="377" alt="image" src="https://github.com/user-attachments/assets/6ecaa7d2-0ffc-4da1-a53c-ba1e1357559c" />
 
+batch_size = 256
 
-    Обучение закончено за 37.3952100276947 секунд
-    
+<img width="974" height="368" alt="image" src="https://github.com/user-attachments/assets/f010f325-90fe-45d0-998d-b797f3a3c9e2" />
+
+stride
+
+<img width="974" height="396" alt="image" src="https://github.com/user-attachments/assets/4ddc4cea-bd75-4bb3-85b7-c5257fadb754" />
+
+Max-pooling
+
+<img width="974" height="393" alt="image" src="https://github.com/user-attachments/assets/dba88987-fe0e-4da6-8f50-3a570dc8daf8" />
+
+Average-pooling
+
+<img width="974" height="390" alt="image" src="https://github.com/user-attachments/assets/ac625601-8d36-4f5b-a241-db71aea7f42c" />
+
 
 ### Проверка качества модели по классам на обучающей и тестовой выборках
 
